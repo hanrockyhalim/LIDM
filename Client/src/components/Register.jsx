@@ -1,7 +1,55 @@
+import { useEffect, useState } from "react";
 import { logo1, logo2, logo3 } from "../assets";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
 
 const Register = () => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confPassword, setConfPassword] = useState("");
+  const [role, setRole] = useState("user");
+  const navigate = useNavigate();
+  const [passwordMatch, setPasswordMatch] = useState(true);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Check if the password and confirm password match
+    if (password !== confPassword) {
+      setPasswordMatch(false);
+      return;
+    }
+
+    try {
+      const updatedData = {
+        name: name,
+        email: email,
+        password: password,
+        confPassword: confPassword,
+        role: role,
+      };
+      console.log(updatedData);
+      const response = await axios.post(
+        "https://lidm-production.up.railway.app/users",
+        updatedData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response) {
+        navigate(`/login`);
+      }
+    } catch (error) {
+      console.error(error);
+      // Handle error scenarios
+    }
+  };
+
   return (
     <section className="h-full w-full flex justify-evenly overflow-hidden">
       <div className="mx-[103px] my-[47px] h-full w-[50%] bg-tertiary flex flex-col  items-center rounded-xl">
@@ -17,8 +65,8 @@ const Register = () => {
           </h1>
           <h1 className=" text-4xl"></h1>
           <p className=" px-20 mt-7">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum
-            et metus euismod, cursus metus ac, varius orci..
+            Gerakan Literasi Sekolah menumbuhkembangkan budi pekerti peserta
+            didik agar menjadi pembelajar sepanjang hayat
           </p>
           <div className="flex items-center justify-center bg-white w-[517px] h-[109px] mt-[150px] mb-[42px] rounded-xl">
             <img src={logo2} className=" p-2" />
@@ -34,7 +82,10 @@ const Register = () => {
             Masuk
           </Link>
         </h2>
-        <form className=" text-[25px] font-bold mr-[90px]">
+        <form
+          onSubmit={handleSubmit}
+          className=" text-[25px] font-bold mr-[90px]"
+        >
           <div className="mt-2" />
           <label>Nama Lengkap</label>
           <br />
@@ -42,8 +93,10 @@ const Register = () => {
             name="name"
             type="text"
             id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             placeholder="nama lengkap"
-            className="w-full bg-white py-3 px-5 rounded-xl text-[#939FB1] text-[20px] focus:text-black"
+            className="w-full bg-white py-3 px-5 rounded-xl text-black text-[20px] placeholder-[#939FB1]"
           />
           <div className="mt-2" />
           <label>Email</label>
@@ -53,7 +106,9 @@ const Register = () => {
             type="email"
             id="email"
             placeholder="alamat email"
-            className="w-full bg-white py-3 px-5 rounded-xl text-[#939FB1] text-[20px] focus:text-black"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full bg-white py-3 px-5 rounded-xl text-black text-[20px] placeholder-[#939FB1]"
           />
           <div className="mt-2" />
           <label>Sandi</label>
@@ -63,23 +118,45 @@ const Register = () => {
             type="password"
             id="password"
             placeholder="kata sandi"
-            className="w-full bg-white py-3 px-5 rounded-xl text-[#939FB1] text-[20px] focus:text-black"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full bg-white py-3 px-5 rounded-xl  text-black text-[20px] placeholder-[#939FB1]"
           />
           <div className="mt-2" />
           <label>Konfirmasi Sandi</label>
           <br />
           <input
-            name="konfirmasi"
+            name="confpassword"
             type="password"
             id="konfirmasi"
+            value={confPassword}
+            onChange={(e) => setConfPassword(e.target.value)}
             placeholder="konfirmasi kata sandi"
-            className="w-full bg-white py-3 px-5 rounded-xl text-[#939FB1] text-[20px] focus:text-black"
+            className="w-full bg-white py-3 px-5 rounded-xl  text-black text-[20px] placeholder-[#939FB1]"
           />
+          {!passwordMatch && (
+            <p className="text-red-600 mt-1">
+              Sandi dan Konfirmasi sandi harus sama.
+            </p>
+          )}
+          <div className="mt-2" />
+          <label>Daftar Sebagai</label>
+          <br />
+          <select
+            name="role"
+            id="role"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            className="w-full bg-white py-3 px-5 rounded-xl  text-black text-[20px] placeholder-[#939FB1]"
+          >
+            <option value="user">Pembaca</option>
+            <option value="donatur">Donatur</option>
+          </select>
 
           <input
             value="Daftar"
             type="submit"
-            className="bg-[#0868F9] px-10 py-3 mt-8 rounded-lg text-[white] text-[20px]"
+            className="bg-[#0868F9] px-10 py-3 mt-8 rounded-lg text-[white] text-[20px] cursor-pointer"
           />
 
           <h2 className="text-left text-[20px] text-[#939FB1] font-bold mt-3">

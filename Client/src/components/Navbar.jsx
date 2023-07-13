@@ -1,25 +1,65 @@
 import { useState, useEffect } from "react";
-
 import { logo } from "../assets";
-import { Link } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { logOut, reset, getMe } from "../state/index.js";
+import axios from "axios";
 
 const Navbar = () => {
   const [active, setActive] = useState("");
   const location = useLocation();
   const pathSegments = location.pathname.split("/");
   const firstPath = pathSegments[1];
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [data, setData] = useState([]);
+
+  const { user, isError, isSuccess, isLoading, message } = useSelector(
+    (state) => state.auth
+  );
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          "https://lidm-production.up.railway.app/me"
+        );
+        console.log(response.data);
+        setData(response.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const logout = () => {
+    dispatch(logOut());
+    dispatch(reset());
+    navigate("/");
+  };
+
+  useEffect(() => {
+    dispatch(getMe());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (isError) {
+      navigate("/");
+    }
+  }, [isError, navigate]);
 
   useEffect(() => {
     setActive(firstPath);
-  }, [firstPath]);
+  }, []);
 
   return (
     <div className="flex flex-col items-center fixed h-full w-40 bg-white">
       <Link
-        to="/profile"
+        to={`/profile/${data.uuid}`}
         onClick={() => {
-          setActive("");
+          setActive("profile");
           window.scrollTo(0, 0);
         }}
       >
@@ -27,7 +67,7 @@ const Navbar = () => {
       </Link>
       <div className="bg-black h-[1px] w-32 mt-6" />
       <Link
-        to="/profile"
+        to={`/profile/${data.uuid}`}
         onClick={() => {
           setActive("profile");
         }}
@@ -42,7 +82,7 @@ const Navbar = () => {
         </svg>
       </Link>
       <Link
-        to="/read"
+        to={`/read/${data.uuid}`}
         onClick={() => {
           setActive("read");
         }}
@@ -58,7 +98,7 @@ const Navbar = () => {
         </svg>
       </Link>
       <Link
-        to="/star"
+        to={`/star/${data.uuid}`}
         onClick={() => {
           setActive("star");
         }}
@@ -74,7 +114,7 @@ const Navbar = () => {
         </svg>
       </Link>
       <Link
-        to="/history"
+        to={`/history/${data.uuid}`}
         onClick={() => {
           setActive("history");
         }}
@@ -91,7 +131,7 @@ const Navbar = () => {
         </svg>
       </Link>
 
-      <Link to="/" className=" mt-48">
+      <button onClick={logout} className=" mt-48">
         <svg width="45" height="45" fill="none" className="">
           <path
             stroke="#3B3A5B"
@@ -101,7 +141,7 @@ const Navbar = () => {
             d="M29.5 2H37a5 5 0 0 1 5 5v30a5 5 0 0 1-5 5h-7.5M12 12 2 22l10 10M2 22h30"
           />
         </svg>
-      </Link>
+      </button>
     </div>
   );
 };
